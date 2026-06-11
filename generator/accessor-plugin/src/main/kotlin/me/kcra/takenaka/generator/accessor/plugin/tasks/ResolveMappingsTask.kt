@@ -210,6 +210,7 @@ abstract class ResolveMappingsTask : DefaultTask() {
                 BundledMappingProvider(mappingBundle.get().asFile.toPath(), requiredVersions, manifest.get()).get()
             } else {
                 val yarnProvider = YarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
+                val modernYarnProvider = ModernYarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val quiltProvider = QuiltMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val mappingConfig = buildMappingConfig {
                     version(requiredVersions)
@@ -258,6 +259,8 @@ abstract class ResolveMappingsTask : DefaultTask() {
                             addIfSupported(HashedMappingResolver(versionWorkspace))
                             addIfSupported(YarnMappingResolver(versionWorkspace, yarnProvider, relaxedCache.get()))
                             addIfSupported(QuiltMappingResolver(versionWorkspace, quiltProvider, relaxedCache.get()))
+                            addIfSupported(ModernIntermediaryMappingResolver(versionWorkspace, sharedCacheWorkspace))
+                            addIfSupported(ModernYarnMappingResolver(versionWorkspace, modernYarnProvider, relaxedCache.get()))
                             addIfSupported(
                                 WrappingContributor(
                                     SeargeMappingResolver(

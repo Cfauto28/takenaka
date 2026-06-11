@@ -19,6 +19,12 @@ package me.kcra.takenaka.generator.web.components
 
 import kotlinx.html.*
 import me.kcra.takenaka.generator.web.StyleProvider
+import java.util.Locale
+
+private fun camelCase(str: String): String {
+    val words = str.split(" ")
+    return words.drop(1).map { s -> s.uppercase(Locale.ROOT) }.joinToString("", words[0].lowercase(Locale.ROOT))
+}
 
 /**
  * Appends a namespace badge component.
@@ -29,7 +35,7 @@ import me.kcra.takenaka.generator.web.StyleProvider
  */
 fun FlowContent.badgeComponent(content: String, color: String, styleProvider: StyleProvider? = null) {
     if (styleProvider != null) {
-        val lowercase = content.lowercase()
+        val lowercase = camelCase(content)
 
         p(classes = "badge ${styleProvider.apply("badge-$lowercase", "background-color:$color;")}")
         styleProvider.apply("badge-$lowercase::before", "content:\"$content\";")
@@ -50,7 +56,7 @@ fun FlowContent.badgeComponent(content: String, color: String, styleProvider: St
  */
 fun TR.badgeColumnComponent(content: String, color: String, styleProvider: StyleProvider? = null) {
     if (styleProvider != null) {
-        val lowercase = content.lowercase()
+        val lowercase = camelCase(content)
 
         td(classes = "badge ${styleProvider.apply("badge-$lowercase", "background-color:$color;")}")
         styleProvider.apply("badge-$lowercase::before", "content:\"$content\";")
@@ -70,7 +76,7 @@ fun TR.badgeColumnComponent(content: String, color: String, styleProvider: Style
  * @param styleProvider the style provider, used for generating stylesheets
  */
 fun FlowContent.textBadgeComponent(content: String, color: String, styleProvider: StyleProvider? = null) {
-    val lowercase = content.lowercase()
+    val lowercase = camelCase(content)
 
     if (styleProvider != null) {
         span(classes = "badge-text ${styleProvider.apply("badge-text-$lowercase", "")}")
