@@ -99,7 +99,7 @@ fun FlowContent.textBadgeComponent(content: String, color: String, styleProvider
  * @param styleProvider the style provider, used for generating stylesheets
  */
 fun textBadgeComponentUnsafe(content: String, color: String, styleProvider: StyleProvider? = null): String {
-    val lowercase = content.lowercase()
+    val lowercase = camelCase(content)
 
     return if (styleProvider != null) {
         styleProvider.apply("badge-text-$lowercase::before", "color:$color;content:\"$content\";")
