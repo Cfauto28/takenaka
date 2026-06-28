@@ -50,6 +50,11 @@ val sha1Digest by threadLocalMessageDigest("SHA-1")
 val md5Digest by threadLocalMessageDigest("MD5")
 
 /**
+ * A thread-local SHA-256 digest.
+ */
+val sha256Digest by threadLocalMessageDigest("SHA-256")
+
+/**
  * Computes a checksum using the provided digest, outputting it in a hexadecimal format.
  *
  * @param digest the digest

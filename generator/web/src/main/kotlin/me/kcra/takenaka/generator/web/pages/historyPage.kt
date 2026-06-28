@@ -183,7 +183,7 @@ fun GenerationContext.historyPage(node: ClassAncestryNode): Document = createHTM
 
     lang = "en"
     head {
-        defaultResourcesComponent(rootPath = "../")
+        defaultResourcesComponent(rootPath = "../../")
         if (generator.config.emitMetaTags) {
             metadataComponent(
                 title = lastFriendlyMapping,

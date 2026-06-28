@@ -17,7 +17,7 @@
 
 package me.kcra.takenaka.core.mapping.util
 
-import me.kcra.takenaka.core.util.md5Digest
+import me.kcra.takenaka.core.util.sha256Digest
 import me.kcra.takenaka.core.util.updateAndHex
 import net.fabricmc.mappingio.MappingVisitor
 import net.fabricmc.mappingio.adapter.ForwardingMappingVisitor
@@ -51,7 +51,7 @@ operator fun MappingTreeView.contains(ns: String): Boolean = getNamespaceId(ns) 
  * The resulting hash is stable, meaning the order of namespaces won't affect it.
  */
 val MappingTreeView.ElementMappingView.hash: String
-    get() = md5Digest.updateAndHex(
+    get() = sha256Digest.updateAndHex(
         tree.dstNamespaceIds
             .mapNotNull(::getDstName)
             .sorted()

@@ -106,7 +106,7 @@ open class WebGenerator(override val workspace: Workspace, val config: WebConfig
             val historyNodes = tree.map { node ->
                 val (_, firstKlass) = node.first
 
-                node to firstKlass.hash.take(10)
+                node to firstKlass.hash
             }
 
             // used for looking up history hashes - for linking
@@ -120,7 +120,7 @@ open class WebGenerator(override val workspace: Workspace, val config: WebConfig
             launch(DISPATCHER + CoroutineName("gen-coro")) {
                 val time = measureTimeMillis {
                     historyNodes.forEach { (node, fileHash) ->
-                        historyPage(node).serialize(historyWorkspace, "$fileHash.html")
+                        historyPage(node).serialize(historyWorkspace, "${fileHash.take(2)}/$fileHash.html")
                     }
                 }
                 logger.info { "history pages generated in ${time}ms" }
