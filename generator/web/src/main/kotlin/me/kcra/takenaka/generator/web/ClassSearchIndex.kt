@@ -52,7 +52,13 @@ const val JDK_17_BASE_URL = "https://docs.oracle.com/en/java/javase/17/docs/api"
 /**
  * The base URL of the Java 21 JDK documentation.
  */
+@Deprecated("Use JDK_25_BASE_URL.", ReplaceWith("JDK_25_BASE_URL"))
 const val JDK_21_BASE_URL = "https://docs.oracle.com/en/java/javase/21/docs/api"
+
+/**
+ * The base URL of the Java 25 JDK documentation.
+ */
+const val JDK_25_BASE_URL = "https://docs.oracle.com/en/java/javase/25/docs/api"
 
 /**
  * Fetches and deserializes the package index on the base URL.
