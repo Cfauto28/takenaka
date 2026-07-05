@@ -120,18 +120,3 @@ class FeatherMetadataProvider @Deprecated(
     }
 }
 
-/**
- * Information about one Feather build.
- *
- * @property version the Minecraft version that this build is for
- * @property buildNumber the Feather build number, higher is newer
- * @property isNewFormat whether this build is named via the new format ("version+build.build_number" as opposed to "version.build_number")
- */
-data class YarnBuild(val version: String, val buildNumber: Int, val isNewFormat: Boolean) {
-    override fun toString(): String {
-        if (isNewFormat) {
-            return "$version+build.$buildNumber"
-        }
-        return "$version.$buildNumber"
-    }
-}
