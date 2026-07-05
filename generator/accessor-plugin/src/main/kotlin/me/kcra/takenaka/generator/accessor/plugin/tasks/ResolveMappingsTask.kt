@@ -215,6 +215,7 @@ abstract class ResolveMappingsTask : DefaultTask() {
                 val yarnProvider = YarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val modernYarnProvider = ModernYarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val quiltProvider = QuiltMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
+                val featherProvider = FeatherMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val mappingConfig = buildMappingConfig {
                     version(requiredVersions)
                     workspace(mappingCacheWorkspace)
@@ -264,6 +265,8 @@ abstract class ResolveMappingsTask : DefaultTask() {
                             addIfSupported(QuiltMappingResolver(versionWorkspace, quiltProvider, relaxedCache.get()))
                             addIfSupported(ModernIntermediaryMappingResolver(versionWorkspace, sharedCacheWorkspace))
                             addIfSupported(ModernYarnMappingResolver(versionWorkspace, modernYarnProvider, relaxedCache.get()))
+                            addIfSupported(CalamusMappingResolver(versionWorkspace, sharedCacheWorkspace))
+                            addIfSupported(FeatherMappingResolver(versionWorkspace, featherProvider, relaxedCache.get()))
                             addIfSupported(
                                 WrappingContributor(
                                     SeargeMappingResolver(

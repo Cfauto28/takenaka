@@ -58,6 +58,8 @@ val NAMESPACES = mapOf(
     "hashed" to NamespaceDescription("Hashed", "#3344ff", null),
     "modern-yarn" to NamespaceDescription("Modern Yarn", "#626262", ModernYarnMappingResolver.META_LICENSE),
     "modern-intermediary" to NamespaceDescription("Modern Intermediary", "#0369A1", ModernIntermediaryMappingResolver.META_LICENSE),
+    "feather" to NamespaceDescription("Feather", "#626262", FeatherMappingResolver.META_LICENSE),
+    "calamus" to NamespaceDescription("Calamus", "#0369A1", CalamusMappingResolver.META_LICENSE)
 )
 
 /**
@@ -129,7 +131,7 @@ fun main(args: Array<String>) {
     val ancestryNamespaces = namespaceKeys
         .filter(ancestryNamespace::contains)
         .ifEmpty {
-            listOf("mojang", "spigot", "searge", "intermediary", "modern-intermediary")
+            listOf("mojang", "spigot", "searge", "intermediary", "modern-intermediary", "calamus")
                 .filter(namespaceKeys::contains)
         }
 
@@ -157,6 +159,7 @@ fun main(args: Array<String>) {
     val yarnProvider = YarnMetadataProvider(sharedCache, relaxedCache = !strictCache)
     val modernYarnProvider = ModernYarnMetadataProvider(sharedCache, relaxedCache = !strictCache)
     val quiltProvider = QuiltMetadataProvider(sharedCache, relaxedCache = !strictCache)
+    val featherProvider = FeatherMetadataProvider(sharedCache, relaxedCache = !strictCache)
     val mappingConfig = buildMappingConfig {
         version(version)
         workspace(mappingsCache)
@@ -194,6 +197,8 @@ fun main(args: Array<String>) {
                 addIfSupported(QuiltMappingResolver(versionWorkspace, quiltProvider, relaxedCache = !strictCache))
                 addIfSupported(ModernIntermediaryMappingResolver(versionWorkspace, sharedCache))
                 addIfSupported(ModernYarnMappingResolver(versionWorkspace, modernYarnProvider, relaxedCache = !strictCache))
+                addIfSupported(CalamusMappingResolver(versionWorkspace, sharedCache))
+                addIfSupported(FeatherMappingResolver(versionWorkspace, featherProvider, relaxedCache = !strictCache))
                 addIfSupported(
                     WrappingContributor(
                         SeargeMappingResolver(

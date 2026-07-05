@@ -28,6 +28,8 @@ The goal of this project is to improve the maintainability and performance of th
 - [x] QuiltMC mappings
 - [x] Modern Intermediary (RelativityMC) mappings
 - [x] Modern Yarn (RelativityMC mappings)
+- [x] Calamus (OrnitheMC mappings)
+- [x] Feather (OrnitheMC mappings)
 
 ## Usage
 
