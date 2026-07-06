@@ -161,7 +161,7 @@ Both namespaces will still be shown as usual on class detail pages.
 
 *The `source` (obfuscated) namespace is always implicitly appended last.*
 
-By default, all available namespaces are used (`mojang, spigot, yarn, quilt, searge, intermediary, hashed, modern-yarn, modern-intermediary, legacy-intermediaries, legacy_yarn`).
+By default, all available namespaces are used (`mojang, spigot, yarn, quilt, searge, intermediary, hashed, modern-yarn, modern-intermediary, legacy-intermediaries, legacy-yarn`).
 
 #### `--ancestryNamespace` option
 
