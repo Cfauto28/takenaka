@@ -58,7 +58,7 @@ class LegacyYarnMappingResolver(
     val legacyYarnProvider: LegacyYarnMetadataProvider,
     val relaxedCache: Boolean = true
 ) : AbstractMappingResolver(), MappingContributor, LicenseResolver {
-    override val licenseSource: String = "https://raw.githubusercontent.com/Legacy-Fabric/yarn/master/LICENSE"
+    override val licenseSource: String = "https://raw.githubusercontent.com/Legacy-Fabric/yarn/v2/LICENSE"
     override val targetNamespace: String = "legacy-yarn"
     override val outputs: List<Output<out Path?>>
         get() = listOf(mappingOutput, licenseOutput)
@@ -213,7 +213,6 @@ class LegacyYarnMappingResolver(
             // official is the obfuscated one
             MappingReader.read(reader, MappingNsRenamer(visitor, mapOf(
                 "official" to MappingUtil.NS_SOURCE_FALLBACK,
-                "intermediary" to "legacy-intermediaries",
                 "named" to targetNamespace
             )))
 
