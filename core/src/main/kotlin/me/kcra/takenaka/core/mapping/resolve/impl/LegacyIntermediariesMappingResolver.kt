@@ -40,18 +40,18 @@ import kotlin.io.path.reader
 private val logger = KotlinLogging.logger {}
 
 /**
- * A resolver for the Calamus mappings from OrnitheMC.
+ * A resolver for the Legacy Intermediaries mappings from Legacy Fabric.
  *
  * @property workspace the workspace
  * @property licenseWorkspace the workspace where the license will be stored
  * @author Matouš Kučera
  */
-class CalamusMappingResolver(
+class LegacyIntermediariesMappingResolver(
     override val workspace: VersionedWorkspace,
     val licenseWorkspace: Workspace = workspace
 ) : AbstractMappingResolver(), MappingContributor, LicenseResolver {
-    override val licenseSource: String = "https://raw.githubusercontent.com/OrnitheMC/calamus/gen2/LICENSE"
-    override val targetNamespace: String = "calamus"
+    override val licenseSource: String = "https://raw.githubusercontent.com/Legacy-Fabric/Legacy-Intermediaries/v2/LICENSE"
+    override val targetNamespace: String = "legacy-intermediaries"
     override val outputs: List<Output<out Path?>>
         get() = listOf(mappingOutput, licenseOutput)
 
@@ -59,21 +59,21 @@ class CalamusMappingResolver(
         resolver {
             val file = workspace[MAPPINGS]
 
-            val url = URL("https://raw.githubusercontent.com/OrnitheMC/calamus/gen2/mappings/${version.id}.tiny")
+            val url = URL("https://raw.githubusercontent.com/Legacy-Fabric/Legacy-Intermediaries/v2/mappings/${version.id}.tiny")
             val length = url.contentLength
 
             if (length == -1L) {
-                logger.info { "did not find Calamus mappings for ${version.id}" }
+                logger.info { "did not find Legacy Intermediaries mappings for ${version.id}" }
                 return@resolver null
             }
 
             if (MAPPINGS in workspace) {
                 if (file.fileSize() == length) {
-                    logger.info { "matched same length for cached ${version.id} Calamus mappings" }
+                    logger.info { "matched same length for cached ${version.id} Legacy Intermediaries mappings" }
                     return@resolver file
                 }
 
-                logger.warn { "length mismatch for ${version.id} Calamus mapping cache, fetching them again" }
+                logger.warn { "length mismatch for ${version.id} Legacy Intermediaries mapping cache, fetching them again" }
             }
 
             withContext(Dispatchers.IO + CoroutineName("resolve-coro")) {
@@ -81,11 +81,11 @@ class CalamusMappingResolver(
                     if (it.ok) {
                         it.copyTo(file)
 
-                        logger.info { "fetched ${version.id} Calamus mappings" }
+                        logger.info { "fetched ${version.id} Legacy Intermediaries mappings" }
                         return@httpRequest file
                     }
 
-                    logger.warn { "failed to fetch ${version.id} Calamus mappings, received ${it.responseCode}" }
+                    logger.warn { "failed to fetch ${version.id} Legacy Intermediaries mappings, received ${it.responseCode}" }
                     return@httpRequest null
                 }
             }
@@ -99,13 +99,13 @@ class CalamusMappingResolver(
             licenseWorkspace.withLock(WORKSPACE_LOCK) {
                 val file = licenseWorkspace[LICENSE]
                 if (LICENSE in licenseWorkspace) {
-                    logger.info { "found cached Calamus license file" }
+                    logger.info { "found cached Legacy Intermediaries license file" }
                     return@withLock file
                 }
 
                 URL(licenseSource).copyTo(file) // TODO: use IO context
 
-                logger.info { "fetched Calamus license file" }
+                logger.info { "fetched Legacy Intermediaries license file" }
                 return@withLock file
             }
         }
@@ -142,21 +142,21 @@ class CalamusMappingResolver(
         /**
          * The file name of the cached mappings.
          */
-        const val MAPPINGS = "calamus_mappings.tiny"
+        const val MAPPINGS = "legacy_intermediaries_mappings.tiny"
 
         /**
          * The file name of the cached license file.
          */
-        const val LICENSE = "calamus_license.txt"
+        const val LICENSE = "legacy_intermediaries_license.txt"
 
         /**
          * The license metadata key.
          */
-        const val META_LICENSE = "calamus_license"
+        const val META_LICENSE = "legacy_intermediaries_license"
 
         /**
          * The license source metadata key.
          */
-        const val META_LICENSE_SOURCE = "calamus_license_source"
+        const val META_LICENSE_SOURCE = "legacy_intermediaries_license_source"
     }
 }
