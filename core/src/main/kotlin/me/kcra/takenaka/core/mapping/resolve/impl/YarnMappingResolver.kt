@@ -90,6 +90,10 @@ class YarnMappingResolver(
     override val mappingOutput = lazyOutput<Path?> {
         resolver {
 
+            if (Regex("1.14|1.14.1|1.14.2").matches(version.id)){
+                return@resolver = null
+            }
+
             val file = workspace[MAPPING_JAR]
 
             val builds = yarnProvider.versions[version.id]
@@ -197,15 +201,13 @@ class YarnMappingResolver(
 
             // FIXME: this shouldn't be here, but it's necessary for mapping-io to map Yarn parameter names
             // add missing intermediary mappings for constructors, an equivalent of StandardProblemKinds#SPECIAL_METHOD_NOT_MAPPED
-            if (Regex("1.14|1.14.1|1.14.2").!matches(version.id))
-                if (visitor0 is MappingTree) {
-                    val nsId = visitor0.getNamespaceId("intermediary")
-                    if (nsId != MappingTree.NULL_NAMESPACE_ID) {
-                        visitor0.classes.forEach { klass ->
-                            klass.methods.forEach { method ->
-                                if (method.isConstructor) {
-                                    method.setDstName(method.srcName, nsId)
-                                }
+            if (visitor0 is MappingTree) {
+                val nsId = visitor0.getNamespaceId("intermediary")
+                if (nsId != MappingTree.NULL_NAMESPACE_ID) {
+                    visitor0.classes.forEach { klass ->
+                        klass.methods.forEach { method ->
+                            if (method.isConstructor) {
+                                method.setDstName(method.srcName, nsId)
                             }
                         }
                     }
