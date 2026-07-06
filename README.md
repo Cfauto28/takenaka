@@ -21,8 +21,8 @@ The goal of this project is to improve the maintainability and performance of th
 
 - [x] Mojang mappings
 - [x] Intermediary (FabricMC mappings)
-- [x] Searge (Forge mappings) (ClassNames only)
-- [x] Spigot mappings (ClassNames only after 1.17.1)
+- [x] Searge (Forge mappings)
+- [x] Spigot mappings 
 - [x] Yarn (FabricMC mappings)
 - [x] Hashed (QuiltMC mappings)
 - [x] QuiltMC mappings
