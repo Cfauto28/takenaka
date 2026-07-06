@@ -99,17 +99,17 @@ class FeatherMappingResolver(
 
             val targetBuild = builds.maxBy(YarnBuild::buildNumber)
             withContext(Dispatchers.IO + CoroutineName("resolve-coro")) {
-                var urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-$targetBuild-mergedv2.jar"
+                var urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-gen2-$targetBuild-mergedv2.jar"
                 URL(urlString).httpRequest(method = "HEAD") { mergedv2 ->
                     if (!mergedv2.ok) {
                         logger.info { "mergedv2 Feather JAR for ${version.id} failed to fetch, falling back to v2" }
 
-                        urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-$targetBuild-v2.jar"
+                        urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-gen2-$targetBuild-v2.jar"
                         URL(urlString).httpRequest(method = "HEAD") { v2 ->
                             if (!v2.ok) {
                                 logger.info { "v2 Feather JAR for ${version.id} failed to fetch, falling back to no classifier" }
 
-                                urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-$targetBuild.jar"
+                                urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-gen2-$targetBuild.jar"
                             }
                         }
                     }
