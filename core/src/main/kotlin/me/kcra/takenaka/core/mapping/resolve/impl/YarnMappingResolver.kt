@@ -89,11 +89,6 @@ class YarnMappingResolver(
 
     override val mappingOutput = lazyOutput<Path?> {
         resolver {
-
-            if (Regex("1.14|1.14.1|1.14.2").matches(version.id)){
-                return@resolver = null
-            }
-
             val file = workspace[MAPPING_JAR]
 
             val builds = yarnProvider.versions[version.id]
