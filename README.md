@@ -22,6 +22,7 @@ The goal of this project is to improve the maintainability and performance of th
 - [x] Mojang mappings
 - [x] Intermediary (FabricMC mappings)
 - [x] Searge (Forge mappings)
+- [x] MCP mappings
 - [x] Spigot mappings 
 - [x] Yarn (FabricMC mappings)
 - [x] Hashed (QuiltMC mappings)
@@ -161,7 +162,7 @@ Both namespaces will still be shown as usual on class detail pages.
 
 *The `source` (obfuscated) namespace is always implicitly appended last.*
 
-By default, all available namespaces are used (`mojang, spigot, yarn, quilt, searge, intermediary, hashed, modern-yarn, modern-intermediary, legacy-intermediaries, legacy-yarn`).
+By default, all available namespaces are used (`mojang, spigot, yarn, quilt, searge, intermediary, hashed, modern-yarn, modern-intermediary, legacy-intermediaries, legacy-yarn, mcp`).
 
 #### `--ancestryNamespace` option
 

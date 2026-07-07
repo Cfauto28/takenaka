@@ -267,6 +267,7 @@ abstract class ResolveMappingsTask : DefaultTask() {
                             addIfSupported(ModernYarnMappingResolver(versionWorkspace, modernYarnProvider, relaxedCache.get()))
                             addIfSupported(LegacyIntermediariesMappingResolver(versionWorkspace, sharedCacheWorkspace))
                             addIfSupported(LegacyYarnMappingResolver(versionWorkspace, legacyYarnProvider, relaxedCache.get()))
+                            addIfSupported(MCPMappingResolver(versionWorkspace, relaxedCache.get()))
                             addIfSupported(
                                 WrappingContributor(
                                     SeargeMappingResolver(

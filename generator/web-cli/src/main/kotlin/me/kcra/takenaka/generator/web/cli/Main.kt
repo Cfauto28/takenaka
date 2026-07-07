@@ -60,6 +60,7 @@ val NAMESPACES = mapOf(
     "modern-intermediary" to NamespaceDescription("Modern Intermediary", "#0369A1", ModernIntermediaryMappingResolver.META_LICENSE),
     "legacy-yarn" to NamespaceDescription("Legacy Yarn", "#626262", LegacyYarnMappingResolver.META_LICENSE),
     "legacy-intermediaries" to NamespaceDescription("Legacy Intermediaries", "#0369A1", LegacyIntermediariesMappingResolver.META_LICENSE)
+    "mcp" to NamespaceDescription("MCP", "#8A3636", MCPMappingResolver.META_LICENSE)
 )
 
 /**
@@ -199,6 +200,7 @@ fun main(args: Array<String>) {
                 addIfSupported(ModernYarnMappingResolver(versionWorkspace, modernYarnProvider, relaxedCache = !strictCache))
                 addIfSupported(LegacyIntermediariesMappingResolver(versionWorkspace, sharedCache))
                 addIfSupported(LegacyYarnMappingResolver(versionWorkspace, legacyYarnProvider, relaxedCache = !strictCache))
+                addIfSupported(MCPMappingResolver(versionWorkspace, relaxedCache = !strictCache))
                 addIfSupported(
                     WrappingContributor(
                         SeargeMappingResolver(
