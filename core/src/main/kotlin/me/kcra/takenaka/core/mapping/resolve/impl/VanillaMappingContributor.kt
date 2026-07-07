@@ -160,7 +160,8 @@ abstract class AbstractVanillaMappingContributor(
 
     companion object {
         // include only com.mojang.[math|blaze3d|realmsclient].* (DFU, Brigadier and others are open source), net.minecraft.* and classes without a package (obfuscated)
-        private val CLASS_PATTERN = "com/mojang/(?:math|blaze3d|realmsclient)/.*\\.class|net/minecraft/.*\\.class|[^/]+\\.class".toRegex()
+        // change: we are only generating versions with a server bundle, so include com.mojang.*
+        private val CLASS_PATTERN = "com/mojang/.*\\.class|net/minecraft/.*\\.class|[^/]+\\.class".toRegex()
 
         /**
          * The namespace of the class modifiers.
