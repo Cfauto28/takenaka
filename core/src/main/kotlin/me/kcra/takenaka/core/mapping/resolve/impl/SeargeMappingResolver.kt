@@ -96,7 +96,7 @@ class SeargeMappingResolver(
                     }
                 }
 
-                // let's try the second URL
+                /* Disable Searge for pre MCPConfig versions (1.12.1-) since we can just use MCP and it breaks the build, though i have no clue why it worked
 
                 url = URL("https://maven.minecraftforge.net/de/oceanlabs/mcp/mcp/${version.id}/mcp-${version.id}-srg.zip.sha1")
                 url.httpRequest {
@@ -104,6 +104,7 @@ class SeargeMappingResolver(
                         return@withContext readMcpConfig(it.inputStream.reader().use(Reader::readText))
                     }
                 }
+                */
 
                 logger.warn { "failed to fetch ${version.id} Searge mappings, didn't find a valid URL" }
                 return@withContext null
@@ -145,11 +146,11 @@ class SeargeMappingResolver(
         mappingPath?.reader()?.use { reader ->
             // Searge has obf, srg and id namespaces; obf is the obfuscated one
             MappingReader.read(reader, MappingNsRenamer(visitor, mapOf(
-                // in older versions, there weren't any namespaces, so make sure to rename the fallback too
-                MappingUtil.NS_TARGET_FALLBACK to targetNamespace,
                 "obf" to MappingUtil.NS_SOURCE_FALLBACK,
                 "srg" to targetNamespace,
-                "id" to "${targetNamespace}_id"
+                "id" to "${targetNamespace}_id",
+                // in older versions, there weren't any namespaces, so make sure to rename the fallback too
+                MappingUtil.NS_TARGET_FALLBACK to targetNamespace
             )))
 
             val licensePath by licenseOutput
