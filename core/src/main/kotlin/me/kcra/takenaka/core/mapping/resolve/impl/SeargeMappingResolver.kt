@@ -139,16 +139,17 @@ class SeargeMappingResolver(
      * @param visitor the visitor
      */
     override fun accept(visitor: MappingVisitor) {
+
         val mappingPath by mappingOutput
 
         mappingPath?.reader()?.use { reader ->
             // Searge has obf, srg and id namespaces; obf is the obfuscated one
             MappingReader.read(reader, MappingNsRenamer(visitor, mapOf(
+                // in older versions, there weren't any namespaces, so make sure to rename the fallback too
+                MappingUtil.NS_TARGET_FALLBACK to targetNamespace,
                 "obf" to MappingUtil.NS_SOURCE_FALLBACK,
                 "srg" to targetNamespace,
-                "id" to "${targetNamespace}_id",
-                // in older versions, there weren't any namespaces, so make sure to rename the fallback too
-                MappingUtil.NS_TARGET_FALLBACK to targetNamespace
+                "id" to "${targetNamespace}_id"
             )))
 
             val licensePath by licenseOutput
