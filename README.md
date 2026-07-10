@@ -24,8 +24,8 @@ The goal of this project is to improve the maintainability and performance of th
 - [x] QuiltMC mappings
 - [x] Modern Intermediary (RelativityMC mappings)
 - [x] Modern Yarn (RelativityMC mappings)
-- [x] Legacy Intermediaries (Legacy Fabric mappings)
-- [x] Legacy Yarn (Legacy Fabric mappings)
+- [x] Calamus (OrnitheMC mappings)
+- [x] Feather (OrnitheMC mappings)
 
 ## Usage
 
@@ -157,7 +157,7 @@ Both namespaces will still be shown as usual on class detail pages.
 
 *The `source` (obfuscated) namespace is always implicitly appended last.*
 
-By default, all available namespaces are used (`mojang, spigot, yarn, quilt, searge, intermediary, hashed, modern-yarn, modern-intermediary, legacy-intermediaries, legacy-yarn, mcp`).
+By default, all available namespaces are used (`mojang, spigot, yarn, quilt, searge, intermediary, hashed, modern-yarn, modern-intermediary, calamus, feather, mcp`).
 
 #### `--ancestryNamespace` option
 

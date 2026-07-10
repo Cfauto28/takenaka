@@ -28,7 +28,7 @@ import java.net.URL
 private val logger = KotlinLogging.logger {}
 
 /**
- * A provider of Legacy Yarn's maven-metadata.xml file.
+ * A provider of Feather's maven-metadata.xml file.
  *
  * This class is thread-safe, but presumes that only one instance will operate on a workspace at a time.
  *
@@ -37,9 +37,9 @@ private val logger = KotlinLogging.logger {}
  * @property relaxedCache whether output cache verification constraints should be relaxed
  * @author Matouš Kučera
  */
-class LegacyYarnMetadataProvider @Deprecated(
+class FeatherMetadataProvider @Deprecated(
     "Jackson will be an implementation detail in the future.",
-    ReplaceWith("LegacyYarnMetadataProvider(workspace, relaxedCache)")
+    ReplaceWith("FeatherMetadataProvider(workspace, relaxedCache)")
 ) constructor(val workspace: Workspace, private val xmlMapper: ObjectMapper, val relaxedCache: Boolean = true) {
     /**
      * A map of versions and their builds.
@@ -61,7 +61,7 @@ class LegacyYarnMetadataProvider @Deprecated(
     constructor(workspace: Workspace, relaxedCache: Boolean = true) : this(workspace, XML_MAPPER, relaxedCache)
 
     /**
-     * Parses Legacy Yarn version strings in the metadata file.
+     * Parses Feather version strings in the metadata file.
      *
      * @return the version metadata
      */
@@ -89,26 +89,26 @@ class LegacyYarnMetadataProvider @Deprecated(
     private fun readMetadata(): JsonNode {
         val file = workspace[METADATA]
 
-        val metadataLocation = "https://repo.legacyfabric.net/legacyfabric/net/legacyfabric/v2/yarn/maven-metadata.xml"
+        val metadataLocation = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/maven-metadata.xml"
         if (relaxedCache && METADATA in workspace) {
             URL("$metadataLocation.sha1").httpRequest {
                 if (it.readText() == file.getChecksum(sha1Digest)) {
                     try {
                         return xmlMapper.readTree(file).apply {
-                            logger.info { "read cached Legacy Yarn mappings metadata" }
+                            logger.info { "read cached Feather mappings metadata" }
                         }
                     } catch (e: JacksonException) {
-                        logger.warn(e) { "failed to read cached Legacy Yarn mappings metadata, fetching it again" }
+                        logger.warn(e) { "failed to read cached Feather mappings metadata, fetching it again" }
                     }
                 } else {
-                    logger.warn { "cached Legacy Yarn mappings metadata is outdated or corrupt, fetching it again" }
+                    logger.warn { "cached Feather mappings metadata is outdated or corrupt, fetching it again" }
                 }
             }
         }
 
         URL(metadataLocation).copyTo(file)
 
-        logger.info { "fetched Legacy Yarn metadata" }
+        logger.info { "fetched Feather metadata" }
         return xmlMapper.readTree(file)
     }
 
@@ -116,7 +116,7 @@ class LegacyYarnMetadataProvider @Deprecated(
         /**
          * The file name of the cached version metadata.
          */
-        const val METADATA = "legacy_yarn_metadata.xml"
+        const val METADATA = "feather_metadata.xml"
     }
 }
 

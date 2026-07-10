@@ -161,7 +161,7 @@ abstract class ResolveMappingsTask : DefaultTask() {
     }
 
     init {
-        namespaces.convention(listOf("mojang", "spigot", "yarn", "quilt", "searge", "intermediary", "hashed"))
+        namespaces.convention(listOf("mojang", "mcp", "spigot", "feather", "yarn", "quilt", "modern-yarn", "searge", "intermediary", "hashed", "modern-intermediary", "calamus"))
         cacheDir.convention(project.layout.buildDirectory.dir("takenaka/cache"))
         relaxedCache.convention(true)
         platform.convention(PlatformTristate.SERVER)
@@ -215,7 +215,7 @@ abstract class ResolveMappingsTask : DefaultTask() {
                 val yarnProvider = YarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val modernYarnProvider = ModernYarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val quiltProvider = QuiltMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
-                val legacyYarnProvider = LegacyYarnMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
+                val featherProvider = FeatherMetadataProvider(sharedCacheWorkspace, relaxedCache.get())
                 val mappingConfig = buildMappingConfig {
                     version(requiredVersions)
                     workspace(mappingCacheWorkspace)
@@ -265,8 +265,8 @@ abstract class ResolveMappingsTask : DefaultTask() {
                             addIfSupported(QuiltMappingResolver(versionWorkspace, quiltProvider, relaxedCache.get()))
                             addIfSupported(ModernIntermediaryMappingResolver(versionWorkspace, sharedCacheWorkspace))
                             addIfSupported(ModernYarnMappingResolver(versionWorkspace, modernYarnProvider, relaxedCache.get()))
-                            addIfSupported(LegacyIntermediariesMappingResolver(versionWorkspace, sharedCacheWorkspace))
-                            addIfSupported(LegacyYarnMappingResolver(versionWorkspace, legacyYarnProvider, relaxedCache.get()))
+                            addIfSupported(CalamusMappingResolver(versionWorkspace, sharedCacheWorkspace))
+                            addIfSupported(FeatherMappingResolver(versionWorkspace, legacyYarnProvider, relaxedCache.get()))
                             addIfSupported(MCPMappingResolver(versionWorkspace, relaxedCache.get()))
                             addIfSupported(
                                 WrappingContributor(

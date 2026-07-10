@@ -46,20 +46,20 @@ import kotlin.io.path.reader
 private val logger = KotlinLogging.logger {}
 
 /**
- * A resolver for the Legacy Yarn mappings from Legacy Fabric.
+ * A resolver for the Feather mappings from OrnitheMC.
  *
  * @property workspace the workspace
- * @property legacyYarnProvider the Legacy Yarn metadata provider
+ * @property legacyYarnProvider the Feather metadata provider
  * @property relaxedCache whether output cache verification constraints should be relaxed
  * @author Matouš Kučera
  */
 class LegacyYarnMappingResolver(
     override val workspace: VersionedWorkspace,
-    val legacyYarnProvider: LegacyYarnMetadataProvider,
+    val featherProvider: FeatherMetadataProvider,
     val relaxedCache: Boolean = true
 ) : AbstractMappingResolver(), MappingContributor, LicenseResolver {
-    override val licenseSource: String = "https://raw.githubusercontent.com/Legacy-Fabric/yarn/v2/LICENSE"
-    override val targetNamespace: String = "legacy-yarn"
+    override val licenseSource: String = "https://raw.githubusercontent.com/OrnitheMC/feather/gen2/LICENSE"
+    override val targetNamespace: String = "feather"
     override val outputs: List<Output<out Path?>>
         get() = listOf(mappingOutput, licenseOutput)
 
@@ -72,11 +72,11 @@ class LegacyYarnMappingResolver(
      */
     @Deprecated(
         "Jackson will be an implementation detail in the future.",
-        ReplaceWith("LegacyYarnMappingResolver(workspace, relaxedCache)")
+        ReplaceWith("FeatherMappingResolver(workspace, relaxedCache)")
     )
     @Suppress("DEPRECATION")
     constructor(workspace: VersionedWorkspace, xmlMapper: ObjectMapper, relaxedCache: Boolean = true)
-            : this(workspace, LegacyYarnMetadataProvider(workspace, xmlMapper), relaxedCache)
+            : this(workspace, FeatherMetadataProvider(workspace, xmlMapper), relaxedCache)
 
     /**
      * Creates a new resolver with a default metadata provider.
@@ -85,7 +85,7 @@ class LegacyYarnMappingResolver(
      * @param relaxedCache whether output cache verification constraints should be relaxed
      */
     constructor(workspace: VersionedWorkspace, relaxedCache: Boolean = true)
-            : this(workspace, LegacyYarnMetadataProvider(workspace), relaxedCache)
+            : this(workspace, FeatherMetadataProvider(workspace), relaxedCache)
 
     override val mappingOutput = lazyOutput<Path?> {
         resolver {
@@ -93,7 +93,7 @@ class LegacyYarnMappingResolver(
 
             val builds = legacyYarnProvider.versions[version.id]
             if (builds == null) {
-                logger.info { "did not find Legacy Yarn mappings for ${version.id}" }
+                logger.info { "did not find Feather mappings for ${version.id}" }
                 return@resolver null
             }
 
@@ -102,16 +102,7 @@ class LegacyYarnMappingResolver(
                 var urlString = "https://repo.legacyfabric.net/legacyfabric/net/legacyfabric/v2/yarn/$targetBuild/yarn-$targetBuild-mergedv2.jar"
                 URL(urlString).httpRequest(method = "HEAD") { mergedv2 ->
                     if (!mergedv2.ok) {
-                        logger.info { "mergedv2 Legacy Yarn JAR for ${version.id} failed to fetch, falling back to v2" }
-
-                        urlString = "https://repo.legacyfabric.net/legacyfabric/net/legacyfabric/v2/yarn/$targetBuild/yarn-$targetBuild--v2.jar"
-                        URL(urlString).httpRequest(method = "HEAD") { v2 ->
-                            if (!v2.ok) {
-                                logger.info { "v2 Legacy Yarn JAR for ${version.id} failed to fetch, falling back to no classifier" }
-
-                                urlString = "https://repo.legacyfabric.net/legacyfabric/net/legacyfabric/v2/yarn/$targetBuild/yarn-$targetBuild-.jar"
-                            }
-                        }
+                        logger.info { "Failed to fetch Feather mappings for ${version.id}" }
                     }
                 }
 
@@ -124,27 +115,27 @@ class LegacyYarnMappingResolver(
                             val checksum = file.getChecksum(sha1Digest)
 
                             if (it.readText() == checksum) {
-                                logger.info { "matched checksum for cached ${version.id} Legacy Yarn mappings" }
+                                logger.info { "matched checksum for cached ${version.id} Feather mappings" }
                                 return@withContext findMappingFile(file)
                             }
                         } else if (file.fileSize() == url.contentLength) {
-                            logger.info { "matched same length for cached ${version.id} Legacy Yarn mappings" }
+                            logger.info { "matched same length for cached ${version.id} Feather mappings" }
                             return@withContext findMappingFile(file)
                         }
                     }
 
-                    logger.warn { "checksum/length mismatch for ${version.id} Legacy Yarn mapping cache, fetching them again" }
+                    logger.warn { "checksum/length mismatch for ${version.id} Feather mapping cache, fetching them again" }
                 }
 
                 url.httpRequest {
                     if (it.ok) {
                         it.copyTo(file)
 
-                        logger.info { "fetched ${version.id} Legacy Yarn mappings" }
+                        logger.info { "fetched ${version.id} Feather mappings" }
                         return@httpRequest findMappingFile(file)
                     }
 
-                    logger.warn { "failed to fetch ${version.id} Legacy Yarn mappings, received ${it.responseCode}" }
+                    logger.warn { "failed to fetch ${version.id} Feather mappings, received ${it.responseCode}" }
                     return@httpRequest null
                 }
             }
@@ -158,7 +149,7 @@ class LegacyYarnMappingResolver(
             val file = workspace[LICENSE]
 
             if (LICENSE in workspace) {
-                logger.info { "found cached ${version.id} Legacy Yarn license file" }
+                logger.info { "found cached ${version.id} Feather license file" }
                 return@resolver file
             }
 
@@ -167,12 +158,12 @@ class LegacyYarnMappingResolver(
                     if (it.ok) {
                         it.copyTo(file)
 
-                        logger.info { "fetched ${version.id} Legacy Yarn license file" }
+                        logger.info { "fetched ${version.id} Feather license file" }
                         return@httpRequest file
                     } else if (it.responseCode == 404) {
-                        logger.info { "did not find ${version.id} Legacy Yarn license file" }
+                        logger.info { "did not find ${version.id} Feather license file" }
                     } else {
-                        logger.warn { "failed to fetch Legacy Yarn license file, received ${it.responseCode}" }
+                        logger.warn { "failed to fetch Feather license file, received ${it.responseCode}" }
                     }
 
                     return@httpRequest null
@@ -194,7 +185,7 @@ class LegacyYarnMappingResolver(
         mappingPath?.reader()?.use { reader ->
             val visitor0 = visitor.unwrap()
 
-            // FIXME: this shouldn't be here, but it's necessary for mapping-io to map Legacy Yarn parameter names
+            // FIXME: this shouldn't be here, but it's necessary for mapping-io to map Feather parameter names
             // add missing intermediary mappings for constructors, an equivalent of StandardProblemKinds#SPECIAL_METHOD_NOT_MAPPED
             if (visitor0 is MappingTree) {
                 val nsId = visitor0.getNamespaceId("intermediary")
@@ -209,7 +200,7 @@ class LegacyYarnMappingResolver(
                 }
             }
 
-            // Legacy Yarn has official, named and intermediary namespaces
+            // Feather has official, named and intermediary namespaces
             // official is the obfuscated one
             MappingReader.read(reader, MappingNsRenamer(visitor, mapOf(
                 "official" to MappingUtil.NS_SOURCE_FALLBACK,
@@ -253,26 +244,26 @@ class LegacyYarnMappingResolver(
         /**
          * The file name of the cached mapping JAR.
          */
-        const val MAPPING_JAR = "legacy_yarn_mappings.jar"
+        const val MAPPING_JAR = "feather_mappings.jar"
 
         /**
          * The file name of the cached mappings.
          */
-        const val MAPPINGS = "legacy_yarn_mappings.tiny"
+        const val MAPPINGS = "feather_mappings.tiny"
 
         /**
          * The file name of the cached license file.
          */
-        const val LICENSE = "legacy_yarn_license.txt"
+        const val LICENSE = "feather_license.txt"
 
         /**
          * The license metadata key.
          */
-        const val META_LICENSE = "legacy_yarn_license"
+        const val META_LICENSE = "feather_license"
 
         /**
          * The license source metadata key.
          */
-        const val META_LICENSE_SOURCE = "legacy_yarn_license_source"
+        const val META_LICENSE_SOURCE = "feather_license_source"
     }
 }
