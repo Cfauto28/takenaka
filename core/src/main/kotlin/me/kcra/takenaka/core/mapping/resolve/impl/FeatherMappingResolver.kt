@@ -49,7 +49,7 @@ private val logger = KotlinLogging.logger {}
  * A resolver for the Feather mappings from OrnitheMC.
  *
  * @property workspace the workspace
- * @property legacyYarnProvider the Feather metadata provider
+ * @property featherProvider the Feather metadata provider
  * @property relaxedCache whether output cache verification constraints should be relaxed
  * @author Matouš Kučera
  */
@@ -91,7 +91,7 @@ class FeatherMappingResolver(
         resolver {
             val file = workspace[MAPPING_JAR]
 
-            val builds = legacyYarnProvider.versions[version.id]
+            val builds = featherProvider.versions[version.id]
             if (builds == null) {
                 logger.info { "did not find Feather mappings for ${version.id}" }
                 return@resolver null
@@ -99,7 +99,7 @@ class FeatherMappingResolver(
 
             val targetBuild = builds.maxBy(YarnBuild::buildNumber)
             withContext(Dispatchers.IO + CoroutineName("resolve-coro")) {
-                var urlString = "https://repo.legacyfabric.net/legacyfabric/net/legacyfabric/v2/yarn/$targetBuild/yarn-$targetBuild-mergedv2.jar"
+                var urlString = "https://maven.ornithemc.net/releases/net/ornithemc/feather-gen2/$targetBuild/feather-gen2-$targetBuild-mergedv2.jar"
                 URL(urlString).httpRequest(method = "HEAD") { mergedv2 ->
                     if (!mergedv2.ok) {
                         logger.info { "Failed to fetch Feather mappings for ${version.id}" }
@@ -231,7 +231,7 @@ class FeatherMappingResolver(
                 val entry = it.stream()
                     .filter { e -> e.name == "mappings/mappings.tiny" }
                     .findFirst()
-                    .orElseThrow { RuntimeException("Could not find mapping file in zip file (Legacy Yarn, ${version.id})") }
+                    .orElseThrow { RuntimeException("Could not find mapping file in zip file (Feather, ${version.id})") }
 
                 Files.copy(it.getInputStream(entry), mappingFile, StandardCopyOption.REPLACE_EXISTING)
             }
