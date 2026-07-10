@@ -53,7 +53,7 @@ private val logger = KotlinLogging.logger {}
  * @property relaxedCache whether output cache verification constraints should be relaxed
  * @author Matouš Kučera
  */
-class LegacyYarnMappingResolver(
+class FeatherMappingResolver(
     override val workspace: VersionedWorkspace,
     val featherProvider: FeatherMetadataProvider,
     val relaxedCache: Boolean = true
