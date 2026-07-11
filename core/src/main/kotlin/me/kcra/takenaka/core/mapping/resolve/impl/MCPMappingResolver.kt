@@ -50,7 +50,7 @@ class MCPMappingResolver(
     override val workspace: VersionedWorkspace,
     val licenseWorkspace: Workspace = workspace
 ) : AbstractMappingResolver(), MappingContributor, LicenseResolver {
-    override val licenseSource: String = "https://raw.githubusercontent.com/Cfauto28/MCPTiny/main/MCP-LICENSE"
+    override val licenseSource: String = "https://raw.githubusercontent.com/Cfauto28/SRGTiny/main/MCP-LICENSE"
     override val targetNamespace: String = "mcp"
     override val outputs: List<Output<out Path?>>
         get() = listOf(mappingOutput, licenseOutput)
@@ -59,7 +59,7 @@ class MCPMappingResolver(
         resolver {
             val file = workspace[MAPPINGS]
 
-            val url = URL("https://raw.githubusercontent.com/Cfauto28/MCPTiny/main/tinys/${version.id}-mcp.tiny")
+            val url = URL("https://raw.githubusercontent.com/Cfauto28/SRGTiny/main/mcp/${version.id}-mcp.tiny")
             val length = url.contentLength
 
             if (length == -1L) {
