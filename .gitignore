@@ -1,3 +1,11 @@
 .idea/
 .gradle/
 build/
+core/bin/
+core/build/
+generator/accessor/bin
+generator/accessor-plugin/bin
+generator/accessor-runtime/bin
+generator/common/bin
+generator/web/bin
+generator/web-cli/bin
