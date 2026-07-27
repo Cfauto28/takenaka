@@ -100,7 +100,8 @@ abstract class AbstractSpigotMappingResolver @Deprecated(
     override val mappingOutput = lazyOutput<Path?> {
         resolver {
             //Disable Spigot for 1.8 - 1.8.3
-            if (Regex("1.8.[123]|1.8").matches(version.id)) {
+            if (Regex("1.8.3|1.8").matches(version.id)) {
+                logger.warn { "${version.id}'s Spigot mappings are disabled!" }
                 return@resolver null
             }
 

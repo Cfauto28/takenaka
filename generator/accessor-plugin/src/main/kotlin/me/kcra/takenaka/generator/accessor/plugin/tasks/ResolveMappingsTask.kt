@@ -161,7 +161,7 @@ abstract class ResolveMappingsTask : DefaultTask() {
     }
 
     init {
-        namespaces.convention(listOf("mojang", "mcp", "spigot", "feather", "yarn", "quilt", "modern-yarn", "searge", "intermediary", "hashed", "modern-intermediary", "calamus"))
+        namespaces.convention(listOf("mojang", "mcp", "spigot", "feather", "yarn", "quilt", "modern-yarn", "bukkit", "searge", "intermediary", "hashed", "modern-intermediary", "calamus"))
         cacheDir.convention(project.layout.buildDirectory.dir("takenaka/cache"))
         relaxedCache.convention(true)
         platform.convention(PlatformTristate.SERVER)

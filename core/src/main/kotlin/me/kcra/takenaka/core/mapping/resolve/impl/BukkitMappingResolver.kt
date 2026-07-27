@@ -40,18 +40,18 @@ import kotlin.io.path.reader
 private val logger = KotlinLogging.logger {}
 
 /**
- * A resolver for the MCP mappings.
+ * A resolver for the Bukkit mappings.
  *
  * @property workspace the workspace
  * @property licenseWorkspace the workspace where the license will be stored
  * @author Matouš Kučera
  */
-class MCPMappingResolver(
+class BukkitMappingResolver(
     override val workspace: VersionedWorkspace,
     val licenseWorkspace: Workspace = workspace
 ) : AbstractMappingResolver(), MappingContributor, LicenseResolver {
-    override val licenseSource: String = "https://raw.githubusercontent.com/ModCoderPack/MCPMappingsArchive/refs/heads/master/LICENSE"
-    override val targetNamespace: String = "mcp"
+    override val licenseSource: String = "https://raw.githubusercontent.com/Bukkit/Bukkit/refs/heads/master/LICENCE.txt"
+    override val targetNamespace: String = "bukkit"
     override val outputs: List<Output<out Path?>>
         get() = listOf(mappingOutput, licenseOutput)
 
@@ -59,21 +59,21 @@ class MCPMappingResolver(
         resolver {
             val file = workspace[MAPPINGS]
 
-            val url = URL("https://raw.githubusercontent.com/Cfauto28/SRGTiny/main/mcp/${version.id}-mcp.tiny")
+            val url = URL("https://raw.githubusercontent.com/Cfauto28/SRGTiny/main/bukkit/${version.id}-bukkit.tiny")
             val length = url.contentLength
 
             if (length == -1L) {
-                logger.info { "did not find MCP mappings for ${version.id}" }
+                logger.info { "did not find Bukkit mappings for ${version.id}" }
                 return@resolver null
             }
 
             if (MAPPINGS in workspace) {
                 if (file.fileSize() == length) {
-                    logger.info { "matched same length for cached ${version.id} MCP mappings" }
+                    logger.info { "matched same length for cached ${version.id} Bukkit mappings" }
                     return@resolver file
                 }
 
-                logger.warn { "length mismatch for ${version.id} MCP mapping cache, fetching them again" }
+                logger.warn { "length mismatch for ${version.id} Bukkit mapping cache, fetching them again" }
             }
 
             withContext(Dispatchers.IO + CoroutineName("resolve-coro")) {
@@ -81,11 +81,11 @@ class MCPMappingResolver(
                     if (it.ok) {
                         it.copyTo(file)
 
-                        logger.info { "fetched ${version.id} MCP mappings" }
+                        logger.info { "fetched ${version.id} Bukkit mappings" }
                         return@httpRequest file
                     }
 
-                    logger.warn { "failed to fetch ${version.id} MCP mappings, received ${it.responseCode}" }
+                    logger.warn { "failed to fetch ${version.id} Bukkit mappings, received ${it.responseCode}" }
                     return@httpRequest null
                 }
             }
@@ -99,13 +99,13 @@ class MCPMappingResolver(
             licenseWorkspace.withLock(WORKSPACE_LOCK) {
                 val file = licenseWorkspace[LICENSE]
                 if (LICENSE in licenseWorkspace) {
-                    logger.info { "found cached MCP license file" }
+                    logger.info { "found cached Bukkit license file" }
                     return@withLock file
                 }
 
                 URL(licenseSource).copyTo(file) // TODO: use IO context
 
-                logger.info { "fetched MCP license file" }
+                logger.info { "fetched Bukkit license file" }
                 return@withLock file
             }
         }
@@ -145,21 +145,21 @@ class MCPMappingResolver(
         /**
          * The file name of the cached mappings.
          */
-        const val MAPPINGS = "mcp_mappings.tiny"
+        const val MAPPINGS = "bukkit_mappings.tiny"
 
         /**
          * The file name of the cached license file.
          */
-        const val LICENSE = "mcp_license.txt"
+        const val LICENSE = "bukkit_license.txt"
 
         /**
          * The license metadata key.
          */
-        const val META_LICENSE = "mcp_license"
+        const val META_LICENSE = "bukkit_license"
 
         /**
          * The license source metadata key.
          */
-        const val META_LICENSE_SOURCE = "mcp_license_source"
+        const val META_LICENSE_SOURCE = "bukkit_license_source"
     }
 }

@@ -59,8 +59,9 @@ val NAMESPACES = mapOf(
     "modern-yarn" to NamespaceDescription("Modern Yarn", "#626262", ModernYarnMappingResolver.META_LICENSE),
     "modern-intermediary" to NamespaceDescription("Modern Intermediary", "#0369A1", ModernIntermediaryMappingResolver.META_LICENSE),
     "feather" to NamespaceDescription("Feather", "#626262", FeatherMappingResolver.META_LICENSE),
-    "calamus" to NamespaceDescription("Calamus", "#0369A1", CalamusMappingResolver.META_LICENSE)
-    "mcp" to NamespaceDescription("MCP", "#8A3636", MCPMappingResolver.META_LICENSE)
+    "calamus" to NamespaceDescription("Calamus", "#0369A1", CalamusMappingResolver.META_LICENSE),
+    "mcp" to NamespaceDescription("MCP", "#8A3636", MCPMappingResolver.META_LICENSE),
+    "bukkit" to NamespaceDescription("Bukkit", "#DB781E", BukkitMappingResolver.META_LICENSE)
 )
 
 /**
