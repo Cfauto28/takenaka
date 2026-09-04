@@ -119,25 +119,24 @@ open class WebGenerator(override val workspace: Workspace, val config: WebConfig
                 }
             }
 
-            val semaphore = Semaphore(permits = 4)
-
-            launch(DISPATCHER + CoroutineName("gen-coro")) {
-                semaphore.withPermit {
-                    val time = measureTimeMillis {
-                        historyNodes.forEach { (node, fileHash) ->
-                            historyPage(node).serialize(historyWorkspace, "${fileHash.take(2)}/$fileHash.html")
-                        }
+            run {
+                logger.info { "starting history page generation" }
+                val time = measureTimeMillis {
+                    historyNodes.forEach { (node, fileHash) ->
+                        historyPage(node).serialize(historyWorkspace, "${fileHash.take(2)}/$fileHash.html")
                     }
-                    logger.info { "history pages generated in ${time}ms" }
                 }
+                logger.info { "history pages generated in ${time}ms" }
             }
 
+            val semaphore = Semaphore(permits = 4)
 
             mappings.forEach { (version, tree) ->
                 val nmsVersion = tree.craftBukkitNmsVersion
 
                 launch(DISPATCHER + CoroutineName("gen-coro")) {
                     semaphore.withPermit {
+                        logger.info { "starting ${version.id} pages generation" }
                         val time = measureTimeMillis {
                             val versionWorkspace = currentComposite.createVersionedWorkspace {
                                 this.version = version
