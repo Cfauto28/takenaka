@@ -40,6 +40,8 @@ import me.kcra.takenaka.generator.web.pages.*
 import me.kcra.takenaka.generator.web.transformers.MinifyingTransformer
 import me.kcra.takenaka.generator.web.transformers.Transformer
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import net.fabricmc.mappingio.tree.MappingTreeView
 import java.io.BufferedReader
 import java.nio.file.Files
@@ -117,7 +119,8 @@ open class WebGenerator(override val workspace: Workspace, val config: WebConfig
                 }
             }
 
-            launch(DISPATCHER + CoroutineName("gen-coro")) {
+            run {
+                logger.info { "starting history page generation" }
                 val time = measureTimeMillis {
                     historyNodes.forEach { (node, fileHash) ->
                         historyPage(node).serialize(historyWorkspace, "${fileHash.take(2)}/$fileHash.html")
@@ -126,83 +129,112 @@ open class WebGenerator(override val workspace: Workspace, val config: WebConfig
                 logger.info { "history pages generated in ${time}ms" }
             }
 
+            val semaphore = Semaphore(permits = 4)
+
             mappings.forEach { (version, tree) ->
                 val nmsVersion = tree.craftBukkitNmsVersion
 
                 launch(DISPATCHER + CoroutineName("gen-coro")) {
-                    val time = measureTimeMillis {
-                        val versionWorkspace = currentComposite.createVersionedWorkspace {
-                            this.version = version
-                        }
+                    semaphore.withPermit {
+                        logger.info { "starting ${version.id} pages generation" }
+                        val time = measureTimeMillis {
+                            val versionWorkspace = currentComposite.createVersionedWorkspace {
+                                this.version = version
+                            }
 
-                        val friendlyNameRemapper = ElementRemapper(tree, ::getFriendlyDstName)
-                        val classMap = sortedMapOf<String, MutableMap<ClassType, MutableSet<String>>>()
+                            val friendlyNameRemapper = ElementRemapper(tree, ::getFriendlyDstName)
+                            val classMap = sortedMapOf<String, MutableMap<ClassType, MutableSet<String>>>()
 
-                        // class index format, similar to a CSV:
-                        // first line is a "header", this is a tab-delimited string with friendly namespace names + its badge colors, which are delimited by a colon ("namespace:#color")
-                        // following lines are tab-separated strings with the mappings, each substring belongs to its column (header.split("\t").get(substringIndex) -> "namespace:#color")
-                        // the column order is based on namespaceFriendlinessIndex, so the first non-null column is the friendly name
-                        // "net/minecraft" and "com/mojang" are replaced with "%nm" and "%cm" to reduce duplication
+                            // class index format, similar to a CSV:
+                            // first line is a "header", this is a tab-delimited string with friendly namespace names + its badge colors, which are delimited by a colon ("namespace:#color")
+                            // following lines are tab-separated strings with the mappings, each substring belongs to its column (header.split("\t").get(substringIndex) -> "namespace:#color")
+                            // the column order is based on namespaceFriendlinessIndex, so the first non-null column is the friendly name
+                            // "net/minecraft" and "com/mojang" are replaced with "%nm" and "%cm" to reduce duplication
 
-                        // example:
-                        // Mojang:#4D7C0F   Intermediary:#0369A1    Obfuscated:#581C87
-                        // %cm/math/Matrix3f %nm/class_4581    a
-                        // %cm/math/Matrix4f %nm/class_1159    b
-                        // ... (repeats like this for all classes)
-                        val classIndex = buildString {
-                            val namespaces = tree.allNamespaceIds
-                                .mapNotNull { nsId ->
-                                    val nsName = tree.getNamespaceName(nsId)
-                                    if (nsName in namespaceFriendlyNames) nsName to nsId else null
+                            // example:
+                            // Mojang:#4D7C0F   Intermediary:#0369A1    Obfuscated:#581C87
+                            // %cm/math/Matrix3f %nm/class_4581    a
+                            // %cm/math/Matrix4f %nm/class_1159    b
+                            // ... (repeats like this for all classes)
+                            val classIndex = buildString {
+                                val namespaces = tree.allNamespaceIds
+                                    .mapNotNull { nsId ->
+                                        val nsName = tree.getNamespaceName(nsId)
+                                        if (nsName in namespaceFriendlyNames) nsName to nsId else null
+                                    }
+                                    .sortedBy { config.namespaceFriendlinessIndex.indexOf(it.first) }
+                                    .toMap()
+
+                                appendLine(namespaces.keys.joinToString("\t") {
+                                    "${namespaceFriendlyNames[it]}:${
+                                        getNamespaceBadgeColor(
+                                            it
+                                        )
+                                    }"
+                                })
+
+                                tree.classes.forEach { klass ->
+                                    val type = classTypeOf(klass.modifiers)
+                                    val friendlyName = getFriendlyDstName(klass)
+
+                                    classPage(
+                                        klass,
+                                        type,
+                                        hashMap[klass],
+                                        nmsVersion,
+                                        versionWorkspace,
+                                        friendlyNameRemapper
+                                    )
+                                        .serialize(versionWorkspace, "$friendlyName.html")
+
+                                    classMap.getOrPut(friendlyName.substringBeforeLast('/')) {
+                                        sortedMapOf(
+                                            compareBy(
+                                                ClassType::ordinal
+                                            )
+                                        )
+                                    }
+                                        .getOrPut(type, ::sortedSetOf) += friendlyName.substringAfterLast('/')
+
+                                    appendLine(namespaces.values.joinToString("\t") { nsId ->
+                                        val namespacedNmsVersion =
+                                            if (tree.getNamespaceName(nsId) in versionReplaceCandidates) nmsVersion else null
+
+                                        klass.getName(nsId)?.replaceCraftBukkitNMSVersion(namespacedNmsVersion) ?: ""
+                                    })
                                 }
-                                .sortedBy { config.namespaceFriendlinessIndex.indexOf(it.first) }
+                            }.replace("net/minecraft", "%nm").replace("com/mojang", "%cm")
+
+                            classMap.forEach { (packageName, classes) ->
+                                packagePage(versionWorkspace, packageName, classes)
+                                    .serialize(versionWorkspace, "$packageName/index.html")
+                            }
+
+                            val licenses = config.namespaces
+                                .mapNotNull { (ns, nsDesc) ->
+                                    if (nsDesc.license == null) return@mapNotNull null
+
+                                    val content = nsDesc.license.content.let {
+                                        tree.getMetadata(it).firstNotNullOfOrNull { it1 -> it1.value }
+                                    } ?: return@mapNotNull null
+                                    val source = nsDesc.license.source.let {
+                                        tree.getMetadata(it).firstNotNullOfOrNull { it1 -> it1.value }
+                                    } ?: return@mapNotNull null
+
+                                    return@mapNotNull ns to License(content, source)
+                                }
                                 .toMap()
 
-                            appendLine(namespaces.keys.joinToString("\t") { "${namespaceFriendlyNames[it]}:${getNamespaceBadgeColor(it)}" })
+                            licensePage(versionWorkspace, licenses)
+                                .serialize(versionWorkspace, "licenses.html")
 
-                            tree.classes.forEach { klass ->
-                                val type = classTypeOf(klass.modifiers)
-                                val friendlyName = getFriendlyDstName(klass)
+                            overviewPage(versionWorkspace, classMap.keys)
+                                .serialize(versionWorkspace, "index.html")
 
-                                classPage(klass, type, hashMap[klass], nmsVersion, versionWorkspace, friendlyNameRemapper)
-                                    .serialize(versionWorkspace, "$friendlyName.html")
-
-                                classMap.getOrPut(friendlyName.substringBeforeLast('/')) { sortedMapOf(compareBy(ClassType::ordinal)) }
-                                    .getOrPut(type, ::sortedSetOf) += friendlyName.substringAfterLast('/')
-
-                                appendLine(namespaces.values.joinToString("\t") { nsId ->
-                                    val namespacedNmsVersion = if (tree.getNamespaceName(nsId) in versionReplaceCandidates) nmsVersion else null
-
-                                    klass.getName(nsId)?.replaceCraftBukkitNMSVersion(namespacedNmsVersion) ?: ""
-                                })
-                            }
-                        }.replace("net/minecraft", "%nm").replace("com/mojang", "%cm")
-
-                        classMap.forEach { (packageName, classes) ->
-                            packagePage(versionWorkspace, packageName, classes)
-                                .serialize(versionWorkspace, "$packageName/index.html")
+                            versionWorkspace["class-index.js"].writeText("updateClassIndex(`${classIndex.trim()}`);") // do not minify this file
                         }
-
-                        val licenses = config.namespaces
-                            .mapNotNull { (ns, nsDesc) ->
-                                if (nsDesc.license == null) return@mapNotNull null
-
-                                val content = nsDesc.license.content.let { tree.getMetadata(it).firstNotNullOfOrNull { it1 -> it1.value } } ?: return@mapNotNull null
-                                val source = nsDesc.license.source.let { tree.getMetadata(it).firstNotNullOfOrNull { it1 -> it1.value } } ?: return@mapNotNull null
-
-                                return@mapNotNull ns to License(content, source)
-                            }
-                            .toMap()
-
-                        licensePage(versionWorkspace, licenses)
-                            .serialize(versionWorkspace, "licenses.html")
-
-                        overviewPage(versionWorkspace, classMap.keys)
-                            .serialize(versionWorkspace, "index.html")
-
-                        versionWorkspace["class-index.js"].writeText("updateClassIndex(`${classIndex.trim()}`);") // do not minify this file
+                        logger.info { "${version.id} pages generated in ${time}ms" }
                     }
-                    logger.info { "${version.id} pages generated in ${time}ms" }
                 }
             }
 
