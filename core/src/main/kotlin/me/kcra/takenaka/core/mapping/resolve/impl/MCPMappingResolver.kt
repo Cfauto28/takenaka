@@ -57,6 +57,10 @@ class MCPMappingResolver(
 
     override val mappingOutput = lazyOutput<Path?> {
         resolver {
+            if (Regex("1.13.1|1.13|1.12.1|1.12|1.11.1|1.11|1.10|1.9.2|1.9|1.8").matches(version.id)) {
+                logger.warn { "${version.id}'s MCP mappings are disabled!" }
+                return@resolver null
+            }
             val file = workspace[MAPPINGS]
 
             val url = URL("https://raw.githubusercontent.com/Cfauto28/SRGTiny/main/mcp/${version.id}-mcp.tiny")
