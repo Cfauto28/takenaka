@@ -7,6 +7,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention").version("1.0.0")
+}
+
 fun includeComposite(name: String, vararg modules: String) {
     modules.forEach { module ->
         include(":$name-$module")
