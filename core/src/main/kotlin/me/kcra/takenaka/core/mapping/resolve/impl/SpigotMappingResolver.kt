@@ -33,6 +33,7 @@ import me.kcra.takenaka.core.util.XML_MAPPER
 import me.kcra.takenaka.core.util.copyTo
 import me.kcra.takenaka.core.util.httpRequest
 import me.kcra.takenaka.core.util.ok
+import me.kcra.takenaka.core.util.responseCode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.fabricmc.mappingio.MappedElementKind
 import net.fabricmc.mappingio.MappingUtil
@@ -120,7 +121,7 @@ abstract class AbstractSpigotMappingResolver @Deprecated(
 
             withContext(Dispatchers.IO + CoroutineName("resolve-coro")) {
                 // manifest is going to be non-null, since it's used to fetch mappingAttribute
-                URL("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/${mappingAttribute.value}?at=${spigotProvider.manifest!!.refs["BuildData"]}").httpRequest {
+                spigotProvider.spigotUrlProvider.getBuildDataFile("mappings/${mappingAttribute.value}", spigotProvider.manifest!!.refs["BuildData"]).httpRequest {
                     if (it.ok) {
                         it.copyTo(file)
 
@@ -175,7 +176,7 @@ abstract class AbstractSpigotMappingResolver @Deprecated(
             }
 
             withContext(Dispatchers.IO + CoroutineName("resolve-coro")) {
-                URL("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/pom.xml?at=${manifest.refs["CraftBukkit"]}").httpRequest {
+                spigotProvider.spigotUrlProvider.getCraftBukkitFile("pom.xml", manifest.refs["CraftBukkit"]).httpRequest {
                     if (it.ok) {
                         it.copyTo(file)
 

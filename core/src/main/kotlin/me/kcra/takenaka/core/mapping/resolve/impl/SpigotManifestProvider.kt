@@ -40,7 +40,7 @@ private val logger = KotlinLogging.logger {}
 class SpigotManifestProvider @Deprecated(
     "Jackson will be an implementation detail in the future.",
     ReplaceWith("SpigotManifestProvider(workspace, relaxedCache)")
-) constructor(val workspace: VersionedWorkspace, private val objectMapper: ObjectMapper, val relaxedCache: Boolean = true) {
+) constructor(val workspace: VersionedWorkspace, private val objectMapper: ObjectMapper, val relaxedCache: Boolean = true, val spigotUrlProvider: SpigotUrlProvider = SpigotUrlProvider()) {
     /**
      * The version manifest.
      */
@@ -64,7 +64,7 @@ class SpigotManifestProvider @Deprecated(
      * @param relaxedCache whether output cache verification constraints should be relaxed
      */
     @Suppress("DEPRECATION")
-    constructor(workspace: VersionedWorkspace, relaxedCache: Boolean = true) : this(workspace, MAPPER, relaxedCache)
+    constructor(workspace: VersionedWorkspace, relaxedCache: Boolean = true, spigotUrlProvider: SpigotUrlProvider = SpigotUrlProvider()) : this(workspace, MAPPER, relaxedCache, spigotUrlProvider)
 
     /**
      * Reads the manifest of the targeted version from cache, fetching it if the cache missed.
@@ -85,7 +85,7 @@ class SpigotManifestProvider @Deprecated(
                 }
             }
 
-            URL("https://hub.spigotmc.org/versions/${workspace.version.id}.json").httpRequest {
+            spigotUrlProvider.getSpigotVersionManifest(workspace.version.id).httpRequest {
                 if (it.ok) {
                     it.copyTo(file)
 
@@ -121,7 +121,7 @@ class SpigotManifestProvider @Deprecated(
                 }
             }
 
-            URL("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/info.json?at=${manifest!!.refs["BuildData"]}").copyTo(file)
+            spigotUrlProvider.getBuildDataFile("info.json", manifest!!.refs["BuildData"]).copyTo(file)
 
             logger.info { "fetched ${workspace.version.id} Spigot attributes" }
             return@withLock objectMapper.readValue(file)
@@ -140,5 +140,19 @@ class SpigotManifestProvider @Deprecated(
          * The file name of the cached version attributes.
          */
         const val BUILDDATA_INFO = "spigot_builddata_info.json"
+    }
+}
+
+open class SpigotUrlProvider {
+    open fun getBuildDataFile(fileName: String?, reference: String?): URL {
+        return URL("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/${fileName}?at=${reference}")
+    }
+
+    open fun getCraftBukkitFile(fileName: String?, reference: String?): URL {
+        return URL("https://hub.spigotmc.org/stash/projects/SPIGOT/repos/craftbukkit/raw/${fileName}?at=${reference}");
+    }
+
+    open fun getSpigotVersionManifest(version: String): URL {
+        return URL("https://hub.spigotmc.org/versions/${version}.json")
     }
 }

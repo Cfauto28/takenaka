@@ -29,6 +29,7 @@ import me.kcra.takenaka.core.util.contentLength
 import me.kcra.takenaka.core.util.copyTo
 import me.kcra.takenaka.core.util.httpRequest
 import me.kcra.takenaka.core.util.ok
+import me.kcra.takenaka.core.util.responseCode
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.fabricmc.mappingio.MappingUtil
 import net.fabricmc.mappingio.MappingVisitor

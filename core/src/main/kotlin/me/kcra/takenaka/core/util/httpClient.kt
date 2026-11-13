@@ -17,9 +17,12 @@
 
 package me.kcra.takenaka.core.util
 
+import java.io.File
 import java.io.Reader
 import java.net.HttpURLConnection
+import java.net.URISyntaxException
 import java.net.URL
+import java.net.URLConnection
 import java.nio.file.CopyOption
 import java.nio.file.Files
 import java.nio.file.Path
@@ -41,14 +44,18 @@ fun URL.copyTo(target: Path, vararg options: CopyOption = arrayOf(StandardCopyOp
  * @param action the connection handler
  * @return the result of the action
  */
-inline fun <R> URL.httpRequest(method: String = "GET", action: (HttpURLConnection) -> R): R {
-    val conn = openConnection() as HttpURLConnection
+inline fun <R> URL.httpRequest(method: String = "GET", action: (URLConnection) -> R): R {
+    val conn = openConnection()
 
-    conn.requestMethod = method
+    if (conn is HttpURLConnection) {
+        conn.requestMethod = method
+    }
     try {
         return action(conn)
     } finally {
-        conn.disconnect()
+        if (conn is HttpURLConnection) {
+            conn.disconnect()
+        }
     }
 }
 
@@ -78,11 +85,27 @@ inline val URL.lastModified: Long
         }
     }
 
+inline val URLConnection.responseCode: Int
+    get() = when {
+        this is HttpURLConnection -> responseCode
+        url.protocol == "file" -> if (ok) 200 else 404
+        else -> 200
+    }
+
 /**
  * Returns whether the request's status code is in the 2xx range.
  */
-inline val HttpURLConnection.ok: Boolean
-    get() = responseCode in 200..299
+inline val URLConnection.ok: Boolean
+    get() = when {
+        this is HttpURLConnection -> responseCode in 200..299
+        url.protocol == "file" -> try {
+            val file = File(url.toURI())
+            file.isFile && file.canRead()
+        } catch (e: URISyntaxException) {
+            false
+        }
+        else -> true
+    }
 
 /**
  * Copies the byte stream of the HTTP connection to a file.
@@ -90,7 +113,7 @@ inline val HttpURLConnection.ok: Boolean
  * @param target the file
  * @param options the copy options, the default is to overwrite existing files
  */
-fun HttpURLConnection.copyTo(target: Path, vararg options: CopyOption = arrayOf(StandardCopyOption.REPLACE_EXISTING)) =
+fun URLConnection.copyTo(target: Path, vararg options: CopyOption = arrayOf(StandardCopyOption.REPLACE_EXISTING)) =
     inputStream.use { Files.copy(it, target, *options) }
 
 /**
@@ -98,4 +121,4 @@ fun HttpURLConnection.copyTo(target: Path, vararg options: CopyOption = arrayOf(
  *
  * @return the response
  */
-fun HttpURLConnection.readText(): String = inputStream.reader().use(Reader::readText)
+fun URLConnection.readText(): String = inputStream.reader().use(Reader::readText)

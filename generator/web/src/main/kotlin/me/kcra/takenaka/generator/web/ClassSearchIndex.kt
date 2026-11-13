@@ -28,6 +28,7 @@ import me.kcra.takenaka.core.util.httpRequest
 import me.kcra.takenaka.core.util.readText
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLConnection
 
 /**
  * An internal instance of an [ObjectMapper].
@@ -71,7 +72,7 @@ const val JDK_25_BASE_URL = "https://docs.oracle.com/en/java/javase/25/docs/api"
     ReplaceWith("modularClassSearchIndexOf(baseUrl)", "me.kcra.takenaka.generator.web.modularClassSearchIndexOf")
 )
 fun ObjectMapper.modularClassSearchIndexOf(baseUrl: String): ModularClassSearchIndex {
-    val content = URL("$baseUrl/package-search-index.js").httpRequest(action = HttpURLConnection::readText)
+    val content = URL("$baseUrl/package-search-index.js").httpRequest(action = URLConnection::readText)
     val nodeArray = content.substring(
         content.indexOf('['),
         content.lastIndexOf(']') + 1
